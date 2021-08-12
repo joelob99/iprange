@@ -10,14 +10,21 @@
 #
 # History
 #   2021-08-07: First Release, v1.0.0.
+#   2021-08-12: Update to v1.0.1.
+#               - Fix _isIPv4Addr and _isIPv6Addr.
+#               - Fix to throw an error message when exception.
+#               - Change example's address.
 #
 # ============================================================================
 """IP range module.
 
 This module provides classes that IP range to subnets conversion.
 """
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
+_EXCEPTION_MSG_IP_RANGE_NOT_SET   = "IP address range not set."
+_EXCEPTION_MSG_INVALID_IP_ADDRESS = "Invalid IP address contained."
+_EXCEPTION_MSG_INVALID_IP_RANGE   = "Invalid IP address range specified."
 
 class IPRangeException(Exception):
     pass
@@ -41,9 +48,16 @@ class IPRange:
         :rtype: List[str]
         :raises IPRangeAddressError: Will throw if the invalid address
             range.
+
+        Test:
+            >>> iprange = IPRange()
+            >>> print(iprange.subnet)
+            Traceback (most recent call last):
+                ...
+            IPRangeAddressError: IP address range not set.
         """
         if (self._listSubnet is None):
-            raise IPRangeAddressError
+            raise IPRangeAddressError(_EXCEPTION_MSG_IP_RANGE_NOT_SET)
         return self._listSubnet
 
 
@@ -60,32 +74,32 @@ class IPv4Range(IPRange):
         Example::
 
             intStartAddr intEndAddr    Return
-            ------------------------------------------------------
-            3232235521   3232235620 -> '192.168.0.1-192.168.0.100'
+            --------------------------------------------------
+            3221225985   3221226084 -> '192.0.2.1-192.0.2.100'
 
         Test:
             >>> ipv4range = IPv4Range()
             >>> print(ipv4range.iprange)
             Traceback (most recent call last):
                 ...
-            IPRangeAddressError
-            >>> ipv4range.set_iprange('192.168.0.1-192.168.0.100')
+            IPRangeAddressError: IP address range not set.
+            >>> ipv4range.set_iprange('192.0.2.1-192.0.2.100')
             >>> print(ipv4range._intStartAddr)
-            3232235521
+            3221225985
             >>> print(ipv4range._intEndAddr)
-            3232235620
+            3221226084
             >>> print(ipv4range.iprange)
-            192.168.0.1-192.168.0.100
+            192.0.2.1-192.0.2.100
         """
         if (self._intStartAddr is None or self._intEndAddr is None):
-            raise IPRangeAddressError
+            raise IPRangeAddressError(_EXCEPTION_MSG_IP_RANGE_NOT_SET)
         return _toIPv4AddrString(self._intStartAddr) + '-' + _toIPv4AddrString(self._intEndAddr)
 
     def set_iprange(self, strIPv4Range):
         """Set IPv4 address range.
 
         This method saves integers of the start and end address of the
-        specified IPv4 address range string and makes the subnet lists.
+        specified IPv4 address range string and makes the subnets list.
 
         :param str strIPv4Range: IPv4 address range string.
         :return: None
@@ -94,69 +108,69 @@ class IPv4Range(IPRange):
 
         Example::
 
-            strIPv4Range                   intStartAddr intEndAddr listSubnet
-            ---------------------------------------------------------------------------
-            '192.168.0.1'               -> 3232235521   3232235521 ['192.168.0.1/32']
-            '192.168.0.1-192.168.0.1'   -> 3232235521   3232235521 ['192.168.0.1/32']
-            '192.168.0.1-192.168.0.100' -> 3232235521   3232235620 ['192.168.0.1/32',
-                                                                    '192.168.0.2/31',
-                                                                    '192.168.0.4/30',
-                                                                    '192.168.0.8/29',
-                                                                    '192.168.0.16/28',
-                                                                    '192.168.0.32/27',
-                                                                    '192.168.0.64/27',
-                                                                    '192.168.0.96/30',
-                                                                    '192.168.0.100/32']
+            strIPv4Range               intStartAddr intEndAddr listSubnet
+            ---------------------------------------------------------------------
+            '192.0.2.1'             -> 3221225985   3221225985 ['192.0.2.1/32']
+            '192.0.2.1-192.0.2.1'   -> 3221225985   3221225985 ['192.0.2.1/32']
+            '192.0.2.1-192.0.2.100' -> 3221225985   3221226084 ['192.0.2.1/32',
+                                                                '192.0.2.2/31',
+                                                                '192.0.2.4/30',
+                                                                '192.0.2.8/29',
+                                                                '192.0.2.16/28',
+                                                                '192.0.2.32/27',
+                                                                '192.0.2.64/27',
+                                                                '192.0.2.96/30',
+                                                                '192.0.2.100/32']
 
         Test:
             >>> ipv4range = IPv4Range()
-            >>> ipv4range.set_iprange('192.168.0.1')
+            >>> ipv4range.set_iprange('192.0.2.1')
             >>> print(ipv4range._intStartAddr)
-            3232235521
+            3221225985
             >>> print(ipv4range._intEndAddr)
-            3232235521
+            3221225985
             >>> print(ipv4range.subnet)  # doctest: +NORMALIZE_WHITESPACE
-            ['192.168.0.1/32']
-            >>> ipv4range.set_iprange('192.168.0.1-192.168.0.1')
+            ['192.0.2.1/32']
+            >>> ipv4range.set_iprange('192.0.2.1-192.0.2.1')
             >>> print(ipv4range._intStartAddr)
-            3232235521
+            3221225985
             >>> print(ipv4range._intEndAddr)
-            3232235521
+            3221225985
             >>> print(ipv4range.subnet)  # doctest: +NORMALIZE_WHITESPACE
-            ['192.168.0.1/32']
-            >>> ipv4range.set_iprange('192.168.0.1-192.168.0.100')
+            ['192.0.2.1/32']
+            >>> ipv4range.set_iprange('192.0.2.1-192.0.2.100')
             >>> print(ipv4range._intStartAddr)
-            3232235521
+            3221225985
             >>> print(ipv4range._intEndAddr)
-            3232235620
+            3221226084
             >>> print(ipv4range.subnet)  # doctest: +NORMALIZE_WHITESPACE
-            ['192.168.0.1/32',
-             '192.168.0.2/31',
-             '192.168.0.4/30',
-             '192.168.0.8/29',
-             '192.168.0.16/28',
-             '192.168.0.32/27',
-             '192.168.0.64/27',
-             '192.168.0.96/30',
-             '192.168.0.100/32']
-            >>> ipv4range.set_iprange('192.168.0.1-192.168.0.256')
+            ['192.0.2.1/32',
+             '192.0.2.2/31',
+             '192.0.2.4/30',
+             '192.0.2.8/29',
+             '192.0.2.16/28',
+             '192.0.2.32/27',
+             '192.0.2.64/27',
+             '192.0.2.96/30',
+             '192.0.2.100/32']
+            >>> ipv4range.set_iprange('192.0.2.1-192.0.2.256')
             Traceback (most recent call last):
                 ...
-            IPRangeAddressError
-            >>> ipv4range.set_iprange('192.168.0.100-192.168.0.1')
+            IPRangeAddressError: Invalid IP address contained.
+            >>> ipv4range.set_iprange('192.0.2.100-192.0.2.1')
             Traceback (most recent call last):
                 ...
-            IPRangeAddressError
+            IPRangeAddressError: Invalid IP address range specified.
         """
         list = strIPv4Range.split('-') if strIPv4Range.find('-') != -1 else [strIPv4Range, strIPv4Range]
         if (not _isIPv4Addr(list[0]) or not _isIPv4Addr(list[1])):
-            raise IPRangeAddressError
+            raise IPRangeAddressError(_EXCEPTION_MSG_INVALID_IP_ADDRESS)
 
         self._intStartAddr = _toIPv4AddrInteger(list[0])
         self._intEndAddr = _toIPv4AddrInteger(list[1])
 
         if (self._intStartAddr > self._intEndAddr):
-            raise IPRangeAddressError
+            raise IPRangeAddressError(_EXCEPTION_MSG_INVALID_IP_RANGE)
 
         self._listSubnet = []
         _makeIPv4SubnetFromRange(self._intStartAddr, self._intEndAddr, self._listSubnet)
@@ -183,7 +197,7 @@ class IPv6Range(IPRange):
             >>> print(ipv6range.iprange)
             Traceback (most recent call last):
                 ...
-            IPRangeAddressError
+            IPRangeAddressError: IP address range not set.
             >>> ipv6range.set_iprange('2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0064')
             >>> print(ipv6range._intStartAddr)
             42540766411282592856903984951653826561
@@ -193,14 +207,14 @@ class IPv6Range(IPRange):
             2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0064
         """
         if (self._intStartAddr is None or self._intEndAddr is None):
-            raise IPRangeAddressError
+            raise IPRangeAddressError(_EXCEPTION_MSG_IP_RANGE_NOT_SET)
         return _toIPv6AddrString(self._intStartAddr) + '-' + _toIPv6AddrString(self._intEndAddr)
 
     def set_iprange(self, strIPv6Range):
         """Set IPv6 address range.
 
         This method saves integers of the start and end address of the
-        specified IPv6 address range string and makes the subnet lists.
+        specified IPv6 address range string and makes the subnets list.
 
         :param str strIPv6Range: IPv6 address range string.
         :return: None
@@ -211,9 +225,9 @@ class IPv6Range(IPRange):
 
             strIPv6Range                                                                         intStartAddr                           intEndAddr                             listSubnet
             ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            '2001:0db8:0000:0000:0000:0000:0000:0001'                                         -> 42540766411282592856903984951653826561 42540766411282592856903984951653826561 ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
-            '2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0001' -> 42540766411282592856903984951653826561 42540766411282592856903984951653826561 ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
-            '2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0064' -> 42540766411282592856903984951653826561 42540766411282592856903984951653826660 ['2001:0db8:0000:0000:0000:0000:0000:0001/128',
+            '2001:0dB8:0000:0000:0000:0000:0000:0001'                                         -> 42540766411282592856903984951653826561 42540766411282592856903984951653826561 ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
+            '2001:0dB8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0001' -> 42540766411282592856903984951653826561 42540766411282592856903984951653826561 ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
+            '2001:0dB8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0064' -> 42540766411282592856903984951653826561 42540766411282592856903984951653826660 ['2001:0db8:0000:0000:0000:0000:0000:0001/128',
                                                                                                                                                                                 '2001:0db8:0000:0000:0000:0000:0000:0002/127',
                                                                                                                                                                                 '2001:0db8:0000:0000:0000:0000:0000:0004/126',
                                                                                                                                                                                 '2001:0db8:0000:0000:0000:0000:0000:0008/125',
@@ -225,21 +239,21 @@ class IPv6Range(IPRange):
 
         Test:
             >>> ipv6range = IPv6Range()
-            >>> ipv6range.set_iprange('2001:0db8:0000:0000:0000:0000:0000:0001')
+            >>> ipv6range.set_iprange('2001:0dB8:0000:0000:0000:0000:0000:0001')
             >>> print(ipv6range._intStartAddr)
             42540766411282592856903984951653826561
             >>> print(ipv6range._intEndAddr)
             42540766411282592856903984951653826561
             >>> print(ipv6range.subnet)  # doctest: +NORMALIZE_WHITESPACE
             ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
-            >>> ipv6range.set_iprange('2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0001')
+            >>> ipv6range.set_iprange('2001:0dB8:0000:0000:0000:0000:0000:0001-2001:0dB8:0000:0000:0000:0000:0000:0001')
             >>> print(ipv6range._intStartAddr)
             42540766411282592856903984951653826561
             >>> print(ipv6range._intEndAddr)
             42540766411282592856903984951653826561
             >>> print(ipv6range.subnet)  # doctest: +NORMALIZE_WHITESPACE
             ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
-            >>> ipv6range.set_iprange('2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0064')
+            >>> ipv6range.set_iprange('2001:0dB8:0000:0000:0000:0000:0000:0001-2001:0dB8:0000:0000:0000:0000:0000:0064')
             >>> print(ipv6range._intStartAddr)
             42540766411282592856903984951653826561
             >>> print(ipv6range._intEndAddr)
@@ -254,24 +268,24 @@ class IPv6Range(IPRange):
              '2001:0db8:0000:0000:0000:0000:0000:0040/123',
              '2001:0db8:0000:0000:0000:0000:0000:0060/126',
              '2001:0db8:0000:0000:0000:0000:0000:0064/128']
-            >>> ipv6range.set_iprange('2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:000g')
+            >>> ipv6range.set_iprange('2001:0dB8:0000:0000:0000:0000:0000:0001-2001:0dB8:0000:0000:0000:0000:0000:000g')
             Traceback (most recent call last):
                 ...
-            IPRangeAddressError
-            >>> ipv6range.set_iprange('2001:0db8:0000:0000:0000:0000:0000:0064-2001:0db8:0000:0000:0000:0000:0000:0001')
+            IPRangeAddressError: Invalid IP address contained.
+            >>> ipv6range.set_iprange('2001:0dB8:0000:0000:0000:0000:0000:0064-2001:0dB8:0000:0000:0000:0000:0000:0001')
             Traceback (most recent call last):
                 ...
-            IPRangeAddressError
+            IPRangeAddressError: Invalid IP address range specified.
         """
         list = strIPv6Range.split('-') if strIPv6Range.find('-') != -1 else [strIPv6Range, strIPv6Range]
         if (not _isIPv6Addr(list[0]) or not _isIPv6Addr(list[1])):
-            raise IPRangeAddressError
+            raise IPRangeAddressError(_EXCEPTION_MSG_INVALID_IP_ADDRESS)
 
         self._intStartAddr = _toIPv6AddrInteger(list[0])
         self._intEndAddr = _toIPv6AddrInteger(list[1])
 
         if (self._intStartAddr > self._intEndAddr):
-            raise IPRangeAddressError
+            raise IPRangeAddressError(_EXCEPTION_MSG_INVALID_IP_RANGE)
 
         self._listSubnet = []
         _makeIPv6SubnetFromRange(self._intStartAddr, self._intEndAddr, self._listSubnet)
@@ -288,19 +302,25 @@ def _isIPv4Addr(strIPv4Addr):
 
         strIPv4Addr        Return
         -------------------------
-        '192.168.0.1'   -> True
-        '192.168.1'     -> False
-        '192.168.0.256' -> False
-        '192.168.0.-1'  -> False
+        '192.0.2.1'   -> True
+        '192.0.2'     -> False
+        '192.0.2.256' -> False
+        '192.0.2.-1'  -> False
+        '192.0..1'    -> False
+        '192.0.a.1'   -> False
 
     Test:
-        >>> _isIPv4Addr('192.168.0.1')
+        >>> _isIPv4Addr('192.0.2.1')
         True
-        >>> _isIPv4Addr('192.168.1')
+        >>> _isIPv4Addr('192.0.2')
         False
-        >>> _isIPv4Addr('192.168.0.256')
+        >>> _isIPv4Addr('192.0.2.256')
         False
-        >>> _isIPv4Addr('192.168.0.-1')
+        >>> _isIPv4Addr('192.0.2.-1')
+        False
+        >>> _isIPv4Addr('192.0..1')
+        False
+        >>> _isIPv4Addr('192.0.a.1')
         False
     """
     listStrIPv4Octet = strIPv4Addr.split('.')
@@ -308,8 +328,16 @@ def _isIPv4Addr(strIPv4Addr):
         return False
 
     for i in range(4):
-        intOctet = int(listStrIPv4Octet[i])
-        if (intOctet >= 256 or intOctet < 0):
+        strOctet = ("00" + listStrIPv4Octet[i])[-3:]
+        c1 = strOctet[0:1]
+        c2 = strOctet[1:2]
+        c3 = strOctet[2:3]
+        if ((c1 < '0' or c1 > '9') or
+            (c2 < '0' or c2 > '9') or
+            (c3 < '0' or c3 > '9')):
+            return False
+
+        if (int(strOctet, 10) >= 256):
             return False
 
     return True
@@ -327,19 +355,19 @@ def _isIPv6Addr(strIPv6Addr):
 
         strIPv6Addr                                  Return
         ---------------------------------------------------
-        '2001:0db8:0000:0000:0000:0000:0000:0001' -> True
-        '2001:0db8:0000:0000:0000:0000:0001'      -> False
-        '2001:0db8:0000:0000:0000:0000:0000:001'  -> False
-        '2001:0db8:0000:0000:0000:0000:0000:000g' -> False
+        '2001:0dB8:0000:0000:0000:0000:0000:0001' -> True
+        '2001:0dB8:0000:0000:0000:0000:0001'      -> False
+        '2001:0dB8:0000:0000:0000:0000:0000:001'  -> False
+        '2001:0dB8:0000:0000:0000:0000:0000:000g' -> False
 
     Test:
-        >>> _isIPv6Addr('2001:0db8:0000:0000:0000:0000:0000:0001')
+        >>> _isIPv6Addr('2001:0dB8:0000:0000:0000:0000:0000:0001')
         True
-        >>> _isIPv6Addr('2001:0db8:0000:0000:0000:0000:0001')
+        >>> _isIPv6Addr('2001:0dB8:0000:0000:0000:0000:0001')
         False
-        >>> _isIPv6Addr('2001:0db8:0000:0000:0000:0000:0000:001')
+        >>> _isIPv6Addr('2001:0dB8:0000:0000:0000:0000:0000:001')
         False
-        >>> _isIPv6Addr('2001:0db8:0000:0000:0000:0000:0000:000g')
+        >>> _isIPv6Addr('2001:0dB8:0000:0000:0000:0000:0000:000g')
         False
     """
     listStrIPv6Hextet = strIPv6Addr.split(':')
@@ -355,10 +383,10 @@ def _isIPv6Addr(strIPv6Addr):
         c2 = strHextet[1:2]
         c3 = strHextet[2:3]
         c4 = strHextet[3:4]
-        if (((c1 >= '0' and c1 <= '9') or (c1 >= 'a' and c1 <= 'f')) and
-            ((c2 >= '0' and c2 <= '9') or (c2 >= 'a' and c2 <= 'f')) and
-            ((c3 >= '0' and c3 <= '9') or (c3 >= 'a' and c3 <= 'f')) and
-            ((c4 >= '0' and c4 <= '9') or (c4 >= 'a' and c4 <= 'f'))):
+        if (((c1 >= '0' and c1 <= '9') or (c1 >= 'a' and c1 <= 'f') or (c1 >= 'A' and c1 <= 'F')) and
+            ((c2 >= '0' and c2 <= '9') or (c2 >= 'a' and c2 <= 'f') or (c2 >= 'A' and c2 <= 'F')) and
+            ((c3 >= '0' and c3 <= '9') or (c3 >= 'a' and c3 <= 'f') or (c3 >= 'A' and c3 <= 'F')) and
+            ((c4 >= '0' and c4 <= '9') or (c4 >= 'a' and c4 <= 'f') or (c4 >= 'A' and c4 <= 'F'))):
             pass
         else:
             return False
@@ -375,13 +403,13 @@ def _toIPv4AddrInteger(strIPv4Addr):
 
     Example::
 
-        strIPv4Addr      Return
-        ---------------------------
-        '192.168.0.1' -> 3232235521
+        strIPv4Addr    Return
+        -------------------------
+        '192.0.2.1' -> 3221225985
 
     Test:
-        >>> print(_toIPv4AddrInteger('192.168.0.1'))
-        3232235521
+        >>> print(_toIPv4AddrInteger('192.0.2.1'))
+        3221225985
     """
     listIPv4Octet = strIPv4Addr.split('.')
     return (
@@ -401,12 +429,12 @@ def _toIPv4AddrString(intIPv4AddrInteger):
     Example::
 
         intIPv4AddrInteger    Return
-        -----------------------------------
-        3232235521         -> '192.168.0.1'
+        ---------------------------------
+        3221225985         -> '192.0.2.1'
 
     Test:
-        >>> _toIPv4AddrString(3232235521)
-        '192.168.0.1'
+        >>> _toIPv4AddrString(3221225985)
+        '192.0.2.1'
     """
     return (
         str((intIPv4AddrInteger >> 24) & 0xFF) + '.' +
@@ -427,10 +455,10 @@ def _toIPv6AddrInteger(strIPv6Addr):
 
         strIPv6Addr                                  Return
         -----------------------------------------------------------------------------------
-        '2001:0db8:0000:0000:0000:0000:0000:0001' -> 42540766411282592856903984951653826561
+        '2001:0dB8:0000:0000:0000:0000:0000:0001' -> 42540766411282592856903984951653826561
 
     Test:
-        >>> print(_toIPv6AddrInteger('2001:0db8:0000:0000:0000:0000:0000:0001'))
+        >>> print(_toIPv6AddrInteger('2001:0dB8:0000:0000:0000:0000:0000:0001'))
         42540766411282592856903984951653826561
     """
     listIPv6Hextet = strIPv6Addr.split(':')
@@ -490,34 +518,34 @@ def _makeIPv4SubnetFromRange(intStartAddr, intEndAddr, listSave):
 
         intStartAddr intEndAddr    listSave
         -----------------------------------------------
-        3232235521   3232235521 -> ['192.168.0.1/32']
-        3232235521   3232235620 -> ['192.168.0.1/32',
-                                    '192.168.0.2/31',
-                                    '192.168.0.4/30',
-                                    '192.168.0.8/29',
-                                    '192.168.0.16/28',
-                                    '192.168.0.32/27',
-                                    '192.168.0.64/27',
-                                    '192.168.0.96/30',
-                                    '192.168.0.100/32']
+        3221225985   3221225985 -> ['192.0.2.1/32']
+        3221225985   3221226084 -> ['192.0.2.1/32',
+                                    '192.0.2.2/31',
+                                    '192.0.2.4/30',
+                                    '192.0.2.8/29',
+                                    '192.0.2.16/28',
+                                    '192.0.2.32/27',
+                                    '192.0.2.64/27',
+                                    '192.0.2.96/30',
+                                    '192.0.2.100/32']
 
     Test:
         >>> list = []
-        >>> _makeIPv4SubnetFromRange(3232235521, 3232235521, list)
+        >>> _makeIPv4SubnetFromRange(3221225985, 3221225985, list)
         >>> print(list)
-        ['192.168.0.1/32']
+        ['192.0.2.1/32']
         >>> list = []
-        >>> _makeIPv4SubnetFromRange(3232235521, 3232235620, list)
+        >>> _makeIPv4SubnetFromRange(3221225985, 3221226084, list)
         >>> print(list)  # doctest: +NORMALIZE_WHITESPACE
-        ['192.168.0.1/32',
-         '192.168.0.2/31',
-         '192.168.0.4/30',
-         '192.168.0.8/29',
-         '192.168.0.16/28',
-         '192.168.0.32/27',
-         '192.168.0.64/27',
-         '192.168.0.96/30',
-         '192.168.0.100/32']
+        ['192.0.2.1/32',
+         '192.0.2.2/31',
+         '192.0.2.4/30',
+         '192.0.2.8/29',
+         '192.0.2.16/28',
+         '192.0.2.32/27',
+         '192.0.2.64/27',
+         '192.0.2.96/30',
+         '192.0.2.100/32']
     """
     intSegSize = 2 << 30  # 2**31
     for i in range(1, 32 + 1):
