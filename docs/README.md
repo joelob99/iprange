@@ -18,20 +18,20 @@ Put the extracted directory under the appropriate directory and execute commands
         $ cd iprange/JavaScript
         $ node
         > ipv4range = new (require('./iprange').IPv4Range)()
-        > ipv4range.iprange = '192.168.0.1-192.168.0.100'
+        > ipv4range.iprange = '192.0.2.1-192.0.2.100'
         > ipv4range.iprange
-        '192.168.0.1-192.168.0.100'
+        '192.0.2.1-192.0.2.100'
         > ipv4range.subnet
         [
-          '192.168.0.1/32',
-          '192.168.0.2/31',
-          '192.168.0.4/30',
-          '192.168.0.8/29',
-          '192.168.0.16/28',
-          '192.168.0.32/27',
-          '192.168.0.64/27',
-          '192.168.0.96/30',
-          '192.168.0.100/32'
+          '192.0.2.1/32',
+          '192.0.2.2/31',
+          '192.0.2.4/30',
+          '192.0.2.8/29',
+          '192.0.2.16/28',
+          '192.0.2.32/27',
+          '192.0.2.64/27',
+          '192.0.2.96/30',
+          '192.0.2.100/32'
         ]
         > ipv6range = new (require('./iprange').IPv6Range)()
         > ipv6range.iprange = '2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0064'
@@ -54,9 +54,9 @@ Put the extracted directory under the appropriate directory and execute commands
 
         $ cd iprange/JavaScript
         $ npm pack
-        $ cp iprange-1.0.0.tgz /tmp
+        $ cp iprange-1.0.1.tgz /tmp
         $ cd /tmp
-        $ npm install iprange-1.0.0.tgz
+        $ npm install iprange-1.0.1.tgz
         $ node
         > ipv4range = new (require('iprange').IPv4Range)()
         (---Subsequent command omitted. See the above example.)
@@ -74,9 +74,9 @@ Put the extracted directory under the appropriate directory and execute commands
 
         C:\Users\foo> cd iprange\JavaScript
         C:\Users\foo\iprange\JavaScript> npm pack
-        C:\Users\foo\iprange\JavaScript> copy iprange-1.0.0.tgz C:\Tmp
+        C:\Users\foo\iprange\JavaScript> copy iprange-1.0.1.tgz C:\Tmp
         C:\Users\foo\iprange\JavaScript> cd C:\Tmp
-        C:\Tmp> npm install iprange-1.0.0.tgz
+        C:\Tmp> npm install iprange-1.0.1.tgz
         C:\Tmp> node
         > ipv4range = new (require('iprange').IPv4Range)()
         (---Subsequent command omitted. See Linux example.)
@@ -89,11 +89,11 @@ Put the extracted directory under the appropriate directory and execute commands
         $ python3
         >>> import iprange
         >>> ipv4range = iprange.IPv4Range()
-        >>> ipv4range.set_iprange('192.168.0.1-192.168.0.100')
+        >>> ipv4range.set_iprange('192.0.2.1-192.0.2.100')
         >>> ipv4range.iprange
-        '192.168.0.1-192.168.0.100'
+        '192.0.2.1-192.0.2.100'
         >>> ipv4range.subnet
-        ['192.168.0.1/32', '192.168.0.2/31', '192.168.0.4/30', '192.168.0.8/29', '192.168.0.16/28', '192.168.0.32/27', '192.168.0.64/27', '192.168.0.96/30', '192.168.0.100/32']
+        ['192.0.2.1/32', '192.0.2.2/31', '192.0.2.4/30', '192.0.2.8/29', '192.0.2.16/28', '192.0.2.32/27', '192.0.2.64/27', '192.0.2.96/30', '192.0.2.100/32']
         >>> ipv6range = iprange.IPv6Range()
         >>> ipv6range.set_iprange('2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0064')
         >>> ipv6range.iprange
@@ -105,9 +105,9 @@ Put the extracted directory under the appropriate directory and execute commands
 
         $ cd iprange/Python
         $ python3 setup.py bdist_wheel
-        $ cp dist/iprange-1.0.0-py3-none-any.whl /tmp
+        $ cp dist/iprange-1.0.1-py3-none-any.whl /tmp
         $ cd /tmp
-        $ pip3 install ./iprange-1.0.0-py3-none-any.whl
+        $ pip3 install ./iprange-1.0.1-py3-none-any.whl
         $ python3
         >>> import iprange
         (---Subsequent command omitted. See the above example.)
@@ -123,9 +123,9 @@ Put the extracted directory under the appropriate directory and execute commands
 
         C:\Users\foo> cd iprange\Python
         C:\Users\foo\iprange\Python> python setup.py bdist_wheel
-        C:\Users\foo\iprange\Python> copy dist\iprange-1.0.0-py3-none-any.whl C:\Tmp
+        C:\Users\foo\iprange\Python> copy dist\iprange-1.0.1-py3-none-any.whl C:\Tmp
         C:\Users\foo\iprange\Python> cd C:\Tmp
-        C:\Tmp> pip install iprange-1.0.0-py3-none-any.whl
+        C:\Tmp> pip install iprange-1.0.1-py3-none-any.whl
         C:\Tmp> python
         >>> import iprange
         (---Subsequent command omitted. See Linux example.)
@@ -143,9 +143,9 @@ Put the extracted directory under the appropriate directory and execute commands
 
         $ cd iprange/Python
         $ python setup.py bdist_egg
-        $ cp dist/iprange-1.0.0-py2.7.egg /tmp
+        $ cp dist/iprange-1.0.1-py2.7.egg /tmp
         $ cd /tmp
-        $ easy_install ./iprange-1.0.0-py2.7.egg
+        $ easy_install ./iprange-1.0.1-py2.7.egg
         $ python
         >>> import iprange
         (---Subsequent command omitted. See Python 3 example.)
@@ -161,9 +161,9 @@ Put the extracted directory under the appropriate directory and execute commands
 
         C:\Users\foo> cd iprange\Python
         C:\Users\foo\iprange\Python> python setup.py bdist_egg
-        C:\Users\foo\iprange\Python> copy dist\iprange-1.0.0-py2.7.egg C:\Tmp
+        C:\Users\foo\iprange\Python> copy dist\iprange-1.0.1-py2.7.egg C:\Tmp
         C:\Users\foo\iprange\Python> cd C:\Tmp
-        C:\Tmp> easy_install iprange-1.0.0-py2.7.egg
+        C:\Tmp> easy_install iprange-1.0.1-py2.7.egg
         C:\Tmp> python
         >>> import iprange
         (---Subsequent command omitted. See Python 3 example.)
