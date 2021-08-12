@@ -11,16 +11,24 @@
 *
 * History
 *   2021-08-07: First Release, v1.0.0.
+*   2021-08-12: Update to v1.0.1.
+*               - Fix _isIPv4Addr and _isIPv6Addr.
+*               - Fix to throw an error message when exception.
+*               - Change example's address.
 *
 * @file This script provides classes that IP range to subnets conversion.
 * @copyright joelob99 2021
 * @license MIT License
-* @version v1.0.0
+* @version v1.0.1
 *
 * ============================================================================
 */
 
 'use strict';
+
+const _EXCEPTION_MSG_IP_RANGE_NOT_SET   = 'IP address range not set.';
+const _EXCEPTION_MSG_INVALID_IP_ADDRESS = 'Invalid IP address contained.';
+const _EXCEPTION_MSG_INVALID_IP_RANGE   = 'Invalid IP address range specified.';
 
 /**
 * This class is the base class of ip range exception classes.
@@ -77,7 +85,7 @@ class IPRange {
     */
     get subnet() {
         if (this._arraySubnet == undefined) {
-            throw new IPRangeAddressError();
+            throw new IPRangeAddressError(_EXCEPTION_MSG_IP_RANGE_NOT_SET);
         }
         return this._arraySubnet;
     }
@@ -96,48 +104,48 @@ class IPv4Range extends IPRange {
     *
     * @example
     *   intStartAddr intEndAddr    Return
-    *   ------------------------------------------------------
-    *   3232235521   3232235620 -> '192.168.0.1-192.168.0.100'
+    *   --------------------------------------------------
+    *   3221225985   3221226084 -> '192.0.2.1-192.0.2.100'
     */
     get iprange() {
         if (this._intStartAddr == undefined || this._intEndAddr == undefined) {
-            throw new IPRangeAddressError();
+            throw new IPRangeAddressError(_EXCEPTION_MSG_IP_RANGE_NOT_SET);
         }
         return _toIPv4AddrString(this._intStartAddr) + '-' + _toIPv4AddrString(this._intEndAddr);
     }
 
     /**
     * This setter saves integers of the start and end address of the specified
-    * IPv4 address range string and makes the subnet lists.
+    * IPv4 address range string and makes the subnets list.
     *
     * @param {string} strIPv4Range - IPv4 address range string.
     * @throws {IPRangeAddressError} Will throw if the invalid address range.
     *
     * @example
-    *   strIPv4Range                   intStartAddr intEndAddr arraySubnet
-    *   ---------------------------------------------------------------------------
-    *   '192.168.0.1'               -> 3232235521   3232235521 ['192.168.0.1/32']
-    *   '192.168.0.1-192.168.0.1'   -> 3232235521   3232235521 ['192.168.0.1/32']
-    *   '192.168.0.1-192.168.0.100' -> 3232235521   3232235620 ['192.168.0.1/32',
-    *                                                           '192.168.0.2/31',
-    *                                                           '192.168.0.4/30',
-    *                                                           '192.168.0.8/29',
-    *                                                           '192.168.0.16/28',
-    *                                                           '192.168.0.32/27',
-    *                                                           '192.168.0.64/27',
-    *                                                           '192.168.0.96/30',
-    *                                                           '192.168.0.100/32']
+    *   strIPv4Range               intStartAddr intEndAddr arraySubnet
+    *   ---------------------------------------------------------------------
+    *   '192.0.2.1'             -> 3221225985   3221225985 ['192.0.2.1/32']
+    *   '192.0.2.1-192.0.2.1'   -> 3221225985   3221225985 ['192.0.2.1/32']
+    *   '192.0.2.1-192.0.2.100' -> 3221225985   3221226084 ['192.0.2.1/32',
+    *                                                       '192.0.2.2/31',
+    *                                                       '192.0.2.4/30',
+    *                                                       '192.0.2.8/29',
+    *                                                       '192.0.2.16/28',
+    *                                                       '192.0.2.32/27',
+    *                                                       '192.0.2.64/27',
+    *                                                       '192.0.2.96/30',
+    *                                                       '192.0.2.100/32']
     */
     set iprange(strIPv4Range) {
         const array = strIPv4Range.indexOf('-') != -1 ? strIPv4Range.split('-') : [strIPv4Range, strIPv4Range];
         if (!_isIPv4Addr(array[0]) || !_isIPv4Addr(array[1])) {
-            throw new IPRangeAddressError();
+            throw new IPRangeAddressError(_EXCEPTION_MSG_INVALID_IP_ADDRESS);
         }
         this._intStartAddr = _toIPv4AddrInteger(array[0]);
         this._intEndAddr = _toIPv4AddrInteger(array[1]);
 
         if (this._intStartAddr > this._intEndAddr) {
-            throw new IPRangeAddressError();
+            throw new IPRangeAddressError(_EXCEPTION_MSG_INVALID_IP_RANGE);
         }
 
         this._arraySubnet = [];
@@ -163,14 +171,14 @@ class IPv6Range extends IPRange {
     */
     get iprange() {
         if (this._intStartAddr == undefined || this._intEndAddr == undefined) {
-            throw new IPRangeAddressError();
+            throw new IPRangeAddressError(_EXCEPTION_MSG_IP_RANGE_NOT_SET);
         }
         return _toIPv6AddrString(this._intStartAddr) + '-' + _toIPv6AddrString(this._intEndAddr);
     }
 
     /**
     * This setter saves integers of the start and end address of the specified
-    * IPv6 address range string and makes the subnet lists.
+    * IPv6 address range string and makes the subnets list.
     *
     * @param {string} strIPv6Range - IPv6 address range string.
     * @throws {IPRangeAddressError} Will throw if the invalid address range.
@@ -178,9 +186,9 @@ class IPv6Range extends IPRange {
     * @example
     *   strIPv6Range                                                                         intStartAddr                           intEndAddr                             arraySubnet
     *   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    *   '2001:0db8:0000:0000:0000:0000:0000:0001'                                         -> 42540766411282592856903984951653826561 42540766411282592856903984951653826561 ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
-    *   '2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0001' -> 42540766411282592856903984951653826561 42540766411282592856903984951653826561 ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
-    *   '2001:0db8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0064' -> 42540766411282592856903984951653826561 42540766411282592856903984951653826660 ['2001:0db8:0000:0000:0000:0000:0000:0001/128',
+    *   '2001:0dB8:0000:0000:0000:0000:0000:0001'                                         -> 42540766411282592856903984951653826561 42540766411282592856903984951653826561 ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
+    *   '2001:0dB8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0001' -> 42540766411282592856903984951653826561 42540766411282592856903984951653826561 ['2001:0db8:0000:0000:0000:0000:0000:0001/128']
+    *   '2001:0dB8:0000:0000:0000:0000:0000:0001-2001:0db8:0000:0000:0000:0000:0000:0064' -> 42540766411282592856903984951653826561 42540766411282592856903984951653826660 ['2001:0db8:0000:0000:0000:0000:0000:0001/128',
     *                                                                                                                                                                       '2001:0db8:0000:0000:0000:0000:0000:0002/127',
     *                                                                                                                                                                       '2001:0db8:0000:0000:0000:0000:0000:0004/126',
     *                                                                                                                                                                       '2001:0db8:0000:0000:0000:0000:0000:0008/125',
@@ -193,13 +201,13 @@ class IPv6Range extends IPRange {
     set iprange(strIPv6Range) {
         const array = strIPv6Range.indexOf('-') != -1 ? strIPv6Range.split('-') : [strIPv6Range, strIPv6Range];
         if (!_isIPv6Addr(array[0]) || !_isIPv6Addr(array[1])) {
-            throw new IPRangeAddressError();
+            throw new IPRangeAddressError(_EXCEPTION_MSG_INVALID_IP_ADDRESS);
         }
         this._intStartAddr = _toIPv6AddrInteger(array[0]);
         this._intEndAddr = _toIPv6AddrInteger(array[1]);
 
         if (this._intStartAddr > this._intEndAddr) {
-            throw new IPRangeAddressError();
+            throw new IPRangeAddressError(_EXCEPTION_MSG_INVALID_IP_RANGE);
         }
 
         this._arraySubnet = [];
@@ -214,12 +222,14 @@ class IPv6Range extends IPRange {
 * @return {boolean} true when the specified address an is IPv4 address.
 *
 * @example
-*   strIPv4Addr        Return
-*   -------------------------
-*   '192.168.0.1'   -> True
-*   '192.168.1'     -> False
-*   '192.168.0.256' -> False
-*   '192.168.0.-1'  -> False
+*   strIPv4Addr      Return
+*   -----------------------
+*   '192.0.2.1'   -> True
+*   '192.0.2'     -> False
+*   '192.0.2.256' -> False
+*   '192.0.2.-1'  -> False
+*   '192.0..1'    -> False
+*   '192.0.a.1'   -> False
 */
 function _isIPv4Addr(strIPv4Addr) {
     const arrayStrIPv4Octet = strIPv4Addr.split('.');
@@ -227,8 +237,16 @@ function _isIPv4Addr(strIPv4Addr) {
         return false;
     }
     for (let i=0; i<4; ++i) {
-        let intOctet = parseInt(arrayStrIPv4Octet[i], 10);
-        if (intOctet >= 256 || intOctet < 0) {
+        let strOctet = ('00' + arrayStrIPv4Octet[i]).slice(-3);
+        let c1 = strOctet.charAt(0);
+        let c2 = strOctet.charAt(1);
+        let c3 = strOctet.charAt(2);
+        if ((c1 < '0' || c1 > '9') ||
+            (c2 < '0' || c2 > '9') ||
+            (c3 < '0' || c3 > '9')) {
+            return false;
+        }
+        if (parseInt(strOctet, 10) >= 256) {
             return false;
         }
     }
@@ -245,10 +263,10 @@ function _isIPv4Addr(strIPv4Addr) {
 *  @example
 *    strIPv6Addr                                  Return
 *    ---------------------------------------------------
-*    '2001:0db8:0000:0000:0000:0000:0000:0001' -> True
-*    '2001:0db8:0000:0000:0000:0000:0001'      -> False
-*    '2001:0db8:0000:0000:0000:0000:0000:001'  -> False
-*    '2001:0db8:0000:0000:0000:0000:0000:000g' -> False
+*    '2001:0dB8:0000:0000:0000:0000:0000:0001' -> True
+*    '2001:0dB8:0000:0000:0000:0000:0001'      -> False
+*    '2001:0dB8:0000:0000:0000:0000:0000:001'  -> False
+*    '2001:0dB8:0000:0000:0000:0000:0000:000g' -> False
 */
 function _isIPv6Addr(strIPv6Addr) {
     const arrayStrIPv6Hextet = strIPv6Addr.split(':');
@@ -257,18 +275,14 @@ function _isIPv6Addr(strIPv6Addr) {
     }
     for (let i=0; i<8; ++i) {
         let strHextet = arrayStrIPv6Hextet[i]
-        if (strHextet.length != 4) {
-            return false;
-        }
-
-        let c1 = strHextet.substring(0, 1);
-        let c2 = strHextet.substring(1, 2);
-        let c3 = strHextet.substring(2, 3);
-        let c4 = strHextet.substring(3, 4);
-        if (((c1 >= '0' && c1 <= '9') || (c1 >= 'a' && c1 <= 'f')) &&
-            ((c2 >= '0' && c2 <= '9') || (c2 >= 'a' && c2 <= 'f')) &&
-            ((c3 >= '0' && c3 <= '9') || (c3 >= 'a' && c3 <= 'f')) &&
-            ((c4 >= '0' && c4 <= '9') || (c4 >= 'a' && c4 <= 'f'))) {
+        let c1 = strHextet.charAt(0);
+        let c2 = strHextet.charAt(1);
+        let c3 = strHextet.charAt(2);
+        let c4 = strHextet.charAt(3);
+        if (((c1 >= '0' && c1 <= '9') || (c1 >= 'a' && c1 <= 'f') || (c1 >= 'A' && c1 <= 'F')) &&
+            ((c2 >= '0' && c2 <= '9') || (c2 >= 'a' && c2 <= 'f') || (c2 >= 'A' && c2 <= 'F')) &&
+            ((c3 >= '0' && c3 <= '9') || (c3 >= 'a' && c3 <= 'f') || (c3 >= 'A' && c3 <= 'F')) &&
+            ((c4 >= '0' && c4 <= '9') || (c4 >= 'a' && c4 <= 'f') || (c4 >= 'A' && c4 <= 'F'))) {
             // Nothing to do.
         } else {
             return false;
@@ -284,9 +298,9 @@ function _isIPv6Addr(strIPv6Addr) {
 * @return {number} IPv4 address integer.
 *
 * @example
-*   strIPv4Addr      Return
-*   ---------------------------
-*   '192.168.0.1' -> 3232235521
+*   strIPv4Addr    Return
+*   -------------------------
+*   '192.0.2.1' -> 3221225985
 */
 function _toIPv4AddrInteger(strIPv4Addr) {
     const arrayIPv4Octet = strIPv4Addr.split('.');
@@ -304,8 +318,8 @@ function _toIPv4AddrInteger(strIPv4Addr) {
 *
 * @example
 *   intIPv4AddrInteger    Return
-*   -----------------------------------
-*   3232235521         -> '192.168.0.1'
+*   ---------------------------------
+*   3221225985         -> '192.0.2.1'
 */
 function _toIPv4AddrString(intIPv4AddrInteger) {
     return (((intIPv4AddrInteger >>> 24) & 0xFF).toString(10) + '.' +
@@ -324,7 +338,7 @@ function _toIPv4AddrString(intIPv4AddrInteger) {
 * @example
 *   strIPv6Addr                                  Return
 *   ------------------------------------------------------------------------------------
-*   '2001:0db8:0000:0000:0000:0000:0000:0001' -> 42540766411282592856903984951653826561n
+*   '2001:0dB8:0000:0000:0000:0000:0000:0001' -> 42540766411282592856903984951653826561n
 */
 function _toIPv6AddrInteger(strIPv6Addr) {
     const arrayIPv6Hextet = strIPv6Addr.split(':');
@@ -372,17 +386,17 @@ function _toIPv6AddrString(bintIPv6AddrInteger) {
 *
 * @example
 *   intStartAddr intEndAddr    arraySave
-*   -----------------------------------------------
-*   3232235521   3232235521 -> ['192.168.0.1/32']
-*   3232235521   3232235620 -> ['192.168.0.1/32',
-*                               '192.168.0.2/31',
-*                               '192.168.0.4/30',
-*                               '192.168.0.8/29',
-*                               '192.168.0.16/28',
-*                               '192.168.0.32/27',
-*                               '192.168.0.64/27',
-*                               '192.168.0.96/30',
-*                               '192.168.0.100/32']
+*   ---------------------------------------------
+*   3221225985   3221225985 -> ['192.0.2.1/32']
+*   3221225985   3221226084 -> ['192.0.2.1/32',
+*                               '192.0.2.2/31',
+*                               '192.0.2.4/30',
+*                               '192.0.2.8/29',
+*                               '192.0.2.16/28',
+*                               '192.0.2.32/27',
+*                               '192.0.2.64/27',
+*                               '192.0.2.96/30',
+*                               '192.0.2.100/32']
 */
 function _makeIPv4SubnetFromRange(intStartAddr, intEndAddr, arraySave) {
     let intSegSize = 2147483648;
@@ -486,6 +500,7 @@ function _makeIPv6SubnetFromRange(bintStartAddr, bintEndAddr, arraySave) {
 if (typeof module !== 'undefined') { // module is not defined in browsers.
     module.exports = {
         IPRangeException, IPRangeAddressError, IPRange, IPv4Range, IPv6Range,
+        _EXCEPTION_MSG_IP_RANGE_NOT_SET, _EXCEPTION_MSG_INVALID_IP_ADDRESS, _EXCEPTION_MSG_INVALID_IP_RANGE, // Export for testing.
         _isIPv4Addr, _toIPv4AddrInteger, _toIPv4AddrString, _makeIPv4SubnetFromRange, // Export for testing.
         _isIPv6Addr, _toIPv6AddrInteger, _toIPv6AddrString, _makeIPv6SubnetFromRange, // Export for testing.
     };
